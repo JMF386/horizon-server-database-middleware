@@ -1,40 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Diagnostics;
-using System.Reflection;
-using System.Threading.Tasks;
-using Horizon.Database.Entities;
-using Horizon.Database.Helpers;
-using Horizon.Database.Services;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using Newtonsoft.Json.Serialization;
-using Swashbuckle.AspNetCore.Filters;
+using System;
+using System.IO;
+using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Security.Cryptography;
-using System.Collections.Generic;
-using System.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Horizon.Database
 {
     public class DatabaseChecker
     {
-
         private DbContext context = null;
         private string folderPath = null;
 
@@ -93,7 +67,7 @@ namespace Horizon.Database
                 return true;
             }
             catch
-            {        
+            {
                 Console.WriteLine("Unable to connect to master table.");
                 return false;
             }
@@ -106,19 +80,19 @@ namespace Horizon.Database
             return QueryDatabaseInt(sql) > 0;
         }
 
-
         public void WaitForDatabase(int pollingIntervalSeconds = 10)
         {
-
-            while(!IsServerAlive()) {
+            while (!IsServerAlive())
+            {
                 Console.WriteLine($"Waiting {pollingIntervalSeconds} seconds before polling again ...");
                 Thread.Sleep(pollingIntervalSeconds * 1000);
             }
 
-            if (!IsServerInitialized()) {
+            if (!IsServerInitialized())
+            {
                 // Initialize database
                 Console.WriteLine($"Need to initialize database!");
-                
+
                 // Run CREATE DATABASE script
                 Console.WriteLine($"Running CREATE_DATABASE.sql ...");
                 ExecuteSqlScript(Path.Combine(folderPath, "scripts", "CREATE_DATABASE.sql"));
@@ -132,13 +106,15 @@ namespace Horizon.Database
 
                 // Set all app settings into the database
                 InitializeAppSettings();
-            } else {
+            }
+            else
+            {
                 Console.WriteLine($"Database already initialized!");
             }
-
         }
 
-        public void CreateAdminUser() {
+        public void CreateAdminUser()
+        {
             Console.WriteLine("Creating admin middleware user ...");
 
             string createAdmin = $@"
@@ -147,17 +123,18 @@ namespace Horizon.Database
             ";
             ExecuteSqlCommand(createAdmin);
 
-            // Add database role 
+            // Add database role
             int roleId = QueryDatabaseInt($"SELECT role_id FROM {horizonDatabase}.KEYS.roles where role_name = 'database'");
             int accountId = QueryDatabaseInt($"SELECT account_id FROM {horizonDatabase}.accounts.account where account_name = '{middlewareAdminUser}'");
             ExecuteSqlCommand($"INSERT INTO {horizonDatabase}.accounts.user_role VALUES({accountId}, {roleId}, GETDATE(), GETDATE(), null)");
         }
 
-        public void InitializeAppSettings() {
+        public void InitializeAppSettings()
+        {
             // Insert app group ids
 
             string filePath = Path.Combine(folderPath, "appsettings.json");
-            
+
             // Read the JSON file content
             string jsonContent = File.ReadAllText(filePath);
 
@@ -182,7 +159,8 @@ namespace Horizon.Database
                 ExecuteSqlCommand($"INSERT INTO keys.dim_app_ids VALUES({app.Id}, '{app.Name}', {groupId})");
 
                 // Announcements
-                foreach (var announcement in app.Announcements) {
+                foreach (var announcement in app.Announcements)
+                {
                     ExecuteSqlCommand($"INSERT INTO keys.dim_announcements (announcement_title, announcement_body, create_dt, modified_dt, from_dt, app_id) VALUES('{announcement.Title}', '{announcement.Body}', getdate(), getdate(), getdate(), {app.Id})");
                 }
 
@@ -206,9 +184,8 @@ namespace Horizon.Database
             // Process Channels
             foreach (var channel in appGroupSettings.Channels)
             {
-                ExecuteSqlCommand($"INSERT INTO world.channels VALUES({channel.Id},{channel.AppId},'{channel.Name}',{channel.MaxPlayers},{channel.GenericField1},{channel.GenericField2},{channel.GenericField3},{channel.GenericField4},{channel.GenericFieldFilter})");           
+                ExecuteSqlCommand($"INSERT INTO world.channels VALUES({channel.Id},{channel.AppId},'{channel.Name}',{channel.MaxPlayers},{channel.GenericField1},{channel.GenericField2},{channel.GenericField3},{channel.GenericField4},{channel.GenericFieldFilter})");
             }
-
         }
 
         public void ExecuteSqlScript(string filePath)
@@ -246,12 +223,12 @@ namespace Horizon.Database
                     throw;
                 }
             }
-            
+
             Console.WriteLine("SQL script executed successfully.");
         }
 
         private int QueryDatabaseInt(string sql)
-        {               
+        {
             Console.WriteLine($"Querying database with: {sql}");
             var command = context.Database.GetDbConnection().CreateCommand();
             command.CommandText = sql;
@@ -261,7 +238,8 @@ namespace Horizon.Database
             return (int)result;
         }
 
-        public void ExecuteSqlCommand(string command) {
+        public void ExecuteSqlCommand(string command)
+        {
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
@@ -280,12 +258,12 @@ namespace Horizon.Database
             }
         }
 
-        public void UseHorizonDb() {
+        public void UseHorizonDb()
+        {
             string use_db_command = $"use [{horizonDatabase}]";
 
             Console.WriteLine($"Executing command: {use_db_command}");
             context.Database.ExecuteSqlRaw(use_db_command);
         }
-
     }
 }

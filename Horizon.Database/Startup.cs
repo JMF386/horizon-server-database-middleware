@@ -1,33 +1,25 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using Horizon.Database.Entities;
 using Horizon.Database.Helpers;
 using Horizon.Database.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json.Serialization;
-using Renci.SshNet;
 using Swashbuckle.AspNetCore.Filters;
+using System;
+using System.Collections.Generic;
 
 namespace Horizon.Database
 {
     public class Startup
     {
         public IConfiguration Configuration { get; }
+
         public Startup(IConfiguration configuration, Microsoft.Extensions.Hosting.IHostEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -37,7 +29,6 @@ namespace Horizon.Database
 
             Configuration = builder.Build();
         }
-
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -52,7 +43,6 @@ namespace Horizon.Database
 
                 var connectionString = connectionStringPlaceHolder.Replace("{_SERVER}", serverName).Replace("{_DBNAME}", dbName).Replace("{_USERNAME}", dbUserName).Replace("{_PASSWORD}", dbPassword);
                 dbContextBuilder.UseSqlServer(connectionString);
-
             });
 
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
@@ -70,7 +60,7 @@ namespace Horizon.Database
             {
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
+                    Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n
                                     Enter 'Bearer' [space] and then your token in the text input below.
                                     \r\n\r\nExample: 'Bearer 12345abcdef'",
                     Name = "Authorization",
@@ -92,7 +82,6 @@ namespace Horizon.Database
                             Scheme = "oauth2",
                             Name = "Bearer",
                             In = ParameterLocation.Header,
-
                         },
                         new List<string>()
                     }
@@ -147,7 +136,8 @@ namespace Horizon.Database
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-            } else
+            }
+            else
             {
                 app.UseExceptionHandler("/api/logs/error");
             }

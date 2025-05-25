@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Horizon.Database.DTO
 {
     public class ClanDTO
     {
-
         public int ClanId { get; set; }
         public string ClanName { get; set; }
         public AccountDTO ClanLeaderAccount { get; set; }

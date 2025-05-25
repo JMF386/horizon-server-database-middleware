@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Horizon.Database.DTO
 {
@@ -11,7 +8,6 @@ namespace Horizon.Database.DTO
         public string EulaBody { get; set; }
         public DateTime? FromDt { get; set; }
         public DateTime? ToDt { get; set; }
-
     }
 
     public class ChangeEulaDTO
@@ -21,6 +17,5 @@ namespace Horizon.Database.DTO
         public string EulaBody { get; set; }
         public DateTime? FromDt { get; set; }
         public DateTime? ToDt { get; set; }
-
     }
 }

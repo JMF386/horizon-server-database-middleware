@@ -1,5 +1,4 @@
 ﻿using Horizon.Database.DTO;
-using Horizon.Database.Entities;
 using System.Collections.Generic;
 
 namespace Horizon.Database.Models
@@ -10,7 +9,6 @@ namespace Horizon.Database.Models
         public string AccountName { get; set; }
         public List<string> Roles { get; set; }
         public string Token { get; set; }
-
 
         public AuthenticationResponse(UserDTO user, string token)
         {

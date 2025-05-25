@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Horizon.Database.Entities;
+using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
-using Horizon.Database.DTO;
-using Horizon.Database.Models;
-using Horizon.Database.Entities;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Horizon.Database.Controllers
 {
@@ -16,6 +10,7 @@ namespace Horizon.Database.Controllers
     public class WorldController : ControllerBase
     {
         private Ratchet_DeadlockedContext db;
+
         public WorldController(Ratchet_DeadlockedContext _db)
         {
             db = _db;
@@ -55,6 +50,5 @@ namespace Horizon.Database.Controllers
 
             return locations.GroupBy(x => x.Id).Select(x => x.FirstOrDefault());
         }
-
     }
 }

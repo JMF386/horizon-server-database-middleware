@@ -1,15 +1,11 @@
 ﻿using Horizon.Database.DTO;
 using Horizon.Database.Entities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Horizon.Database.Services
 {
     public class ClanService
     {
-
         public ClanMessageDTO toClanMessageDTO(ClanMessage message)
         {
             return new ClanMessageDTO()

@@ -1,13 +1,11 @@
-﻿using System;
+﻿using Horizon.Database.DTO;
+using Horizon.Database.Entities;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Horizon.Database.DTO;
-using Horizon.Database.Models;
-using Horizon.Database.Entities;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Horizon.Database.Controllers
 {
@@ -16,6 +14,7 @@ namespace Horizon.Database.Controllers
     public class KeysController : ControllerBase
     {
         private Ratchet_DeadlockedContext db;
+
         public KeysController(Ratchet_DeadlockedContext _db)
         {
             db = _db;
@@ -23,16 +22,16 @@ namespace Horizon.Database.Controllers
 
         [Authorize("database")]
         [HttpGet, Route("getAppIds")]
-        public async Task<List<AppIdDTO>> getAppIds()   
+        public async Task<List<AppIdDTO>> getAppIds()
         {
             List<DimAppIds> app_ids = null;
             List<DimAppGroups> app_groups = null;
             List<AppIdDTO> results = new List<AppIdDTO>();
 
             app_ids = await (from app_id in db.DimAppIds
-                       select app_id).ToListAsync();
+                             select app_id).ToListAsync();
             app_groups = await (from app_group in db.DimAppGroups
-                             select app_group).ToListAsync();
+                                select app_group).ToListAsync();
 
             var groupings = app_ids.GroupBy(x => x.GroupId);
             foreach (var grouping in groupings)
@@ -80,8 +79,8 @@ namespace Horizon.Database.Controllers
         public async Task<Dictionary<string, string>> getSettings(int appId)
         {
             var settings = await (from s in db.ServerSettings
-                            where s.AppId == appId
-                            select new { s.Name, s.Value }).ToDictionaryAsync(x => x.Name, x => x.Value);
+                                  where s.AppId == appId
+                                  select new { s.Name, s.Value }).ToDictionaryAsync(x => x.Name, x => x.Value);
 
             return settings;
         }
@@ -119,19 +118,22 @@ namespace Horizon.Database.Controllers
                 eula = (from e in db.DimEula
                         where e.Id == eulaId
                         select e).FirstOrDefault();
-            } else if(fromDt != null && toDt != null)
+            }
+            else if (fromDt != null && toDt != null)
             {
                 eula = (from e in db.DimEula
                         where e.FromDt <= fromDt
                         && (e.ToDt == null || e.ToDt >= toDt)
                         select e).FirstOrDefault();
-            } else if(fromDt != null && toDt == null)
+            }
+            else if (fromDt != null && toDt == null)
             {
                 eula = (from e in db.DimEula
                         where e.FromDt <= fromDt
                         && (e.ToDt == null || e.ToDt >= now)
                         select e).FirstOrDefault();
-            } else
+            }
+            else
             {
                 return BadRequest("Please provide either a eulaId, or a valid fromDt or toDt.");
             }
@@ -207,22 +209,22 @@ namespace Horizon.Database.Controllers
             if (accouncementId != null)
             {
                 announcement = (from a in db.DimAnnouncements
-                        where a.Id == accouncementId
-                        select a).FirstOrDefault();
+                                where a.Id == accouncementId
+                                select a).FirstOrDefault();
             }
             else if (fromDt != null && toDt != null && appId != null)
             {
                 announcement = (from a in db.DimAnnouncements
                                 where a.AppId == AppId && a.FromDt <= fromDt
                         && (a.ToDt == null || a.ToDt >= toDt)
-                        select a).FirstOrDefault();
+                                select a).FirstOrDefault();
             }
             else if (fromDt != null && toDt == null)
             {
                 announcement = (from a in db.DimAnnouncements
                                 where a.AppId == AppId && a.FromDt <= fromDt
-                        && (a.ToDt == null ||a.ToDt >= now)
-                        select a).FirstOrDefault();
+                        && (a.ToDt == null || a.ToDt >= now)
+                                select a).FirstOrDefault();
             }
             else
             {
@@ -242,9 +244,9 @@ namespace Horizon.Database.Controllers
             DateTime now = DateTime.UtcNow;
             announcements = (from a in db.DimAnnouncements
                              orderby a.FromDt descending
-                            where a.AppId == AppId && a.FromDt <= Dt
-                    && (a.ToDt == null || a.ToDt >= Dt)
-                            select a).Take(TakeSize).ToList();
+                             where a.AppId == AppId && a.FromDt <= Dt
+                     && (a.ToDt == null || a.ToDt >= Dt)
+                             select a).Take(TakeSize).ToList();
 
             return announcements;
         }

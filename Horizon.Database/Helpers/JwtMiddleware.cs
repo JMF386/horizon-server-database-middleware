@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Horizon.Database.DTO;
+using Horizon.Database.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Text;
-using Horizon.Database.Services;
-using Horizon.Database.DTO;
+using System.Threading.Tasks;
 
 namespace Horizon.Database.Helpers
 {

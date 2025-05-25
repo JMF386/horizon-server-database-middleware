@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Horizon.Database.DTO
 {
@@ -94,7 +91,6 @@ namespace Horizon.Database.DTO
         public int AccountId { get; set; }
         public string AccountName { get; set; }
         public List<string> Roles { get; set; }
-
     }
 
     public class BanRequestDTO

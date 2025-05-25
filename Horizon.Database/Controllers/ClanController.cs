@@ -1,14 +1,12 @@
-﻿using System;
+﻿using Horizon.Database.DTO;
+using Horizon.Database.Entities;
+using Horizon.Database.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Horizon.Database.DTO;
-using Horizon.Database.Models;
-using Horizon.Database.Entities;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Horizon.Database.Services;
 
 namespace Horizon.Database.Controllers
 {
@@ -18,6 +16,7 @@ namespace Horizon.Database.Controllers
     {
         private Ratchet_DeadlockedContext db;
         private IAuthService authService;
+
         public ClanController(Ratchet_DeadlockedContext _db, IAuthService _authService)
         {
             db = _db;
@@ -66,14 +65,16 @@ namespace Horizon.Database.Controllers
                 return NotFound();
 
             AccountDTO clanLeader = aServ.toAccountDTO(clan.ClanLeaderAccount);
-            if (clanLeader != null) {
+            if (clanLeader != null)
+            {
                 clanLeader.AccountPassword = "";
                 clanLeader.MachineId = "";
                 clanLeader.ResetPasswordOnNextLogin = false;
             }
 
             List<AccountDTO> clanMembers = clan.ClanMember.Where(cm => cm.IsActive == true).Select(cm => aServ.toAccountDTO(cm.Account)).ToList();
-            foreach (AccountDTO member in clanMembers) {
+            foreach (AccountDTO member in clanMembers)
+            {
                 member.AccountPassword = "";
                 member.MachineId = "";
                 member.ResetPasswordOnNextLogin = false;
@@ -115,8 +116,8 @@ namespace Horizon.Database.Controllers
                                .Include(c => c.ClanLeaderAccount)
                                .Include(c => c.ClanInvitation)
                                .ThenInclude(ci => ci.Account)
-                             where c.ClanId == clanId && c.IsActive == true
-                             select c).FirstOrDefault();
+                        where c.ClanId == clanId && c.IsActive == true
+                        select c).FirstOrDefault();
             }
             else
             {
@@ -129,8 +130,8 @@ namespace Horizon.Database.Controllers
                                .Include(c => c.ClanLeaderAccount)
                                .Include(c => c.ClanInvitation)
                                .ThenInclude(ci => ci.Account)
-                             where c.ClanId == clanId && c.IsActive == true
-                             select c).FirstOrDefault();
+                        where c.ClanId == clanId && c.IsActive == true
+                        select c).FirstOrDefault();
             }
 
             if (clan == null)
@@ -206,7 +207,6 @@ namespace Horizon.Database.Controllers
             {
                 ClanId = newClan.ClanId,
                 AccountId = accountId,
-
             };
             db.ClanMember.Add(newMember);
 
@@ -285,7 +285,7 @@ namespace Horizon.Database.Controllers
 
         [Authorize("database")]
         [HttpPost, Route("transferLeadership")]
-        public async Task<dynamic> transferLeadership([FromBody] ClanTransferLeadershipDTO req) 
+        public async Task<dynamic> transferLeadership([FromBody] ClanTransferLeadershipDTO req)
         {
             DateTime now = DateTime.UtcNow;
             var target = (from c in db.Clan where c.ClanId == req.ClanId && c.ClanLeaderAccountId == req.AccountId select c).FirstOrDefault();
@@ -366,7 +366,6 @@ namespace Horizon.Database.Controllers
                                             .ToList();
 
             return invites;
-
         }
 
         [Authorize("database")]
@@ -376,7 +375,7 @@ namespace Horizon.Database.Controllers
             DateTime now = DateTime.UtcNow;
             var target = (from ci in db.ClanInvitation where ci.Id == req.InvitationId && ci.AccountId == req.AccountId select ci).FirstOrDefault();
 
-            if(target != null)
+            if (target != null)
             {
                 // client accepted invitation
                 if (req.Response == 1 && target.IsActive == true)
@@ -385,7 +384,7 @@ namespace Horizon.Database.Controllers
                                     .Include(c => c.ClanMember)
                                     .Include(c => c.ClanInvitation)
                                    .FirstOrDefault();
-                    
+
                     if (clan != null)
                     {
                         clan.ClanMember.Add(new ClanMember()
@@ -441,7 +440,7 @@ namespace Horizon.Database.Controllers
 
             int totalMessages = db.ClanMessage.Where(cm => cm.ClanId == clanId && cm.IsActive == true).Count();
 
-            int totalPages = (int) Math.Ceiling((decimal) totalMessages / pageSize);
+            int totalPages = (int)Math.Ceiling((decimal)totalMessages / pageSize);
 
             if (start < totalPages)
             {
@@ -457,7 +456,6 @@ namespace Horizon.Database.Controllers
             }
 
             return NotFound($"Page index exceeds total of {totalPages}.");
-
         }
 
         [Authorize("database")]

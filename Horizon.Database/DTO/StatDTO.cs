@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Horizon.Database.DTO
 {
@@ -61,5 +58,4 @@ namespace Horizon.Database.DTO
         public int AccountId { get; set; }
         public Dictionary<int, int> Stats { get; set; }
     }
-
 }

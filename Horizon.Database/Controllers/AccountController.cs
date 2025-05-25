@@ -1,18 +1,14 @@
-﻿using System;
+﻿using Horizon.Database.DTO;
+using Horizon.Database.Entities;
+using Horizon.Database.Helpers;
+using Horizon.Database.Models;
+using Horizon.Database.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Horizon.Database.DTO;
-using Horizon.Database.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-using Horizon.Database.Models;
-using Horizon.Database.Services;
-using Horizon.Database.Helpers;
 
 namespace Horizon.Database.Controllers
 {
@@ -22,6 +18,7 @@ namespace Horizon.Database.Controllers
     {
         private Ratchet_DeadlockedContext db;
         private IAuthService authService;
+
         public AccountController(Ratchet_DeadlockedContext _db, IAuthService _authService)
         {
             db = _db;
@@ -70,15 +67,13 @@ namespace Horizon.Database.Controllers
             //                                    .Where(a => a.AccountId == AccountId)
             //                                    .FirstOrDefault();
 
-
-
             if (existingAccount == null)
                 return NotFound();
 
             var existingBan = (from b in db.Banned where b.AccountId == existingAccount.AccountId && b.FromDt <= now && (b.ToDt == null || b.ToDt > now) select b).FirstOrDefault();
             bool accountBanned = existingBan != null ? true : false;
             bool macBanned = await getMacIsBanned(existingAccount.MachineId);
-            
+
             var accountList = db.Account.ToList();
 
             AccountDTO account2 = (from a in db.Account
@@ -126,7 +121,6 @@ namespace Horizon.Database.Controllers
             return account2;
         }
 
-
         [Authorize("discord_bot")]
         [HttpGet, Route("getAccountBasic")]
         public async Task<dynamic> getAccountBasic(int AccountId)
@@ -168,8 +162,8 @@ namespace Horizon.Database.Controllers
         public async Task<string> getAccountMetadata(int AccountId)
         {
             string metadata = (from a in db.Account
-                           where a.AccountId == AccountId
-                           select a.Metadata).FirstOrDefault();
+                               where a.AccountId == AccountId
+                               select a.Metadata).FirstOrDefault();
             return metadata;
         }
 
@@ -195,10 +189,8 @@ namespace Horizon.Database.Controllers
                         ResetPasswordOnNextLogin = request.ResetPasswordOnNextLogin,
                     };
 
-
                     db.Account.Add(acc);
                     db.SaveChanges();
-
 
                     List<AccountStat> newStats = (from ds in db.DimStats
                                                   select new AccountStat()
@@ -234,7 +226,8 @@ namespace Horizon.Database.Controllers
 
                     db.SaveChanges();
                     return await getAccount(acc.AccountId);
-                } else
+                }
+                else
                 {
                     existingAccount.IsActive = true;
                     existingAccount.AccountPassword = request.AccountPassword;
@@ -287,8 +280,8 @@ namespace Horizon.Database.Controllers
                     db.SaveChanges();
                     return await getAccount(existingAccount.AccountId);
                 }
-
-            } else
+            }
+            else
             {
                 return StatusCode(403, $"Account {request.AccountName} already exists.");
             }
@@ -300,7 +293,7 @@ namespace Horizon.Database.Controllers
         {
             DateTime now = DateTime.UtcNow;
             Account existingAccount = db.Account.Where(a => a.AccountName == AccountName && a.AppId == AppId).FirstOrDefault();
-            if(existingAccount == null || existingAccount.IsActive == false)
+            if (existingAccount == null || existingAccount.IsActive == false)
             {
                 return StatusCode(403, "Cannot delete an account that doesn't exist.");
             }
@@ -376,6 +369,7 @@ namespace Horizon.Database.Controllers
             db.SaveChanges();
             return Ok();
         }
+
         [Authorize("database")]
         [HttpPost, Route("postAccountSignInDate")]
         public async Task<dynamic> postAccountSignInDate([FromBody] DateTime SignInDt, int AccountId)
@@ -392,6 +386,7 @@ namespace Horizon.Database.Controllers
 
             return Ok();
         }
+
         [Authorize("database")]
         [HttpPost, Route("postAccountIp")]
         public async Task<dynamic> postAccountIp([FromBody] string IpAddress, int AccountId)
@@ -523,7 +518,6 @@ namespace Horizon.Database.Controllers
             db.SaveChanges();
 
             return Ok("Password Updated");
-
         }
 
         [Authorize("database,moderator")]
@@ -569,35 +563,36 @@ namespace Horizon.Database.Controllers
                 return NotFound();
 
             app_id_group = (from a in db.DimAppIds
-                                where a.AppId == ChangeNameRequest.AppId
-                                select a.GroupId).FirstOrDefault();
+                            where a.AppId == ChangeNameRequest.AppId
+                            select a.GroupId).FirstOrDefault();
 
             app_ids_in_group = (from a in db.DimAppIds
-                                    where (a.GroupId == app_id_group && a.GroupId != null) || a.AppId == ChangeNameRequest.AppId
-                                    select a.AppId).ToList();
+                                where (a.GroupId == app_id_group && a.GroupId != null) || a.AppId == ChangeNameRequest.AppId
+                                select a.AppId).ToList();
 
             Account newAccount = db.Account.Where(a => app_ids_in_group.Contains(a.AppId ?? -1) && a.AccountName == ChangeNameRequest.NewAccountName && a.IsActive == true).FirstOrDefault();
             if (newAccount != null)
                 return StatusCode(403, "The account name already exists.");
 
-            // Check text filters to make sure new name passes 
+            // Check text filters to make sure new name passes
             var settings = await (from s in db.ServerSettings
-                            where s.AppId == ChangeNameRequest.AppId
-                            select new { s.Name, s.Value }).ToDictionaryAsync(x => x.Name, x => x.Value);
+                                  where s.AppId == ChangeNameRequest.AppId
+                                  select new { s.Name, s.Value }).ToDictionaryAsync(x => x.Name, x => x.Value);
 
             string regex = "";
-            if (settings.ContainsKey("TextFilterAccountName")) 
+            if (settings.ContainsKey("TextFilterAccountName"))
             {
                 regex = settings["TextFilterAccountName"];
             }
             // Use normal text filter since no account name filter exists
-            else if (settings.ContainsKey("TextFilterDefault")) 
+            else if (settings.ContainsKey("TextFilterDefault"))
             {
                 regex = settings["TextFilterDefault"];
             }
 
             // Check if name passes regex
-            if (!Utils.PassTextFilter(ChangeNameRequest.NewAccountName, regex)) {
+            if (!Utils.PassTextFilter(ChangeNameRequest.NewAccountName, regex))
+            {
                 return StatusCode(403, "Did not pass text filter!");
             }
 
@@ -633,11 +628,10 @@ namespace Horizon.Database.Controllers
                              where b.MacAddress == MacAddress
                             && b.FromDt <= now
                             && (b.ToDt == null || b.ToDt > now)
-                            select b).FirstOrDefault();
+                             select b).FirstOrDefault();
             return ban != null ? true : false;
         }
 
-        
         [Authorize("database")]
         [HttpGet, Route("checkAccountIsBanned")]
         public async Task<bool> checkAccountIsBanned(string AccountName, int AppId)
@@ -655,7 +649,7 @@ namespace Horizon.Database.Controllers
 
             var existingAccount = db.Account
                 .Where(a => app_ids_in_group.Contains(a.AppId ?? -1) && a.AccountName == AccountName && a.IsActive == true)
-                .Select(a => new 
+                .Select(a => new
                 {
                     a.AccountId,
                     a.LastSignInIp,
@@ -663,7 +657,8 @@ namespace Horizon.Database.Controllers
                 })
                 .FirstOrDefault();
 
-            if (existingAccount == null) {
+            if (existingAccount == null)
+            {
                 return false;
             }
 
@@ -673,9 +668,10 @@ namespace Horizon.Database.Controllers
                 return true;
 
             // Check for IP Ban
-            if (existingAccount.LastSignInIp != null) {
+            if (existingAccount.LastSignInIp != null)
+            {
                 bool ipBanned = await getIpIsBanned(existingAccount.LastSignInIp);
-                if (ipBanned) 
+                if (ipBanned)
                     return true;
             }
 
@@ -743,7 +739,7 @@ namespace Horizon.Database.Controllers
 
         [Authorize("moderator")]
         [HttpPost, Route("banAccount")]
-        public async Task<dynamic> banAccount([FromBody] AccountAndAppIdRequest request) 
+        public async Task<dynamic> banAccount([FromBody] AccountAndAppIdRequest request)
         {
             DateTime now = DateTime.UtcNow;
             var app_id_group = (from a in db.DimAppIds
@@ -766,12 +762,11 @@ namespace Horizon.Database.Controllers
             db.Banned.Add(newBan);
             db.SaveChanges();
             return Ok("Account Banned");
-
         }
 
         [Authorize("moderator")]
         [HttpPost, Route("banIpByAccountName")]
-        public async Task<dynamic> banIpByAccountName([FromBody] AccountAndAppIdRequest request) 
+        public async Task<dynamic> banIpByAccountName([FromBody] AccountAndAppIdRequest request)
         {
             DateTime now = DateTime.UtcNow;
             var app_id_group = (from a in db.DimAppIds
@@ -801,7 +796,7 @@ namespace Horizon.Database.Controllers
 
         [Authorize("moderator")]
         [HttpPost, Route("banMacByAccountName")]
-        public async Task<dynamic> banMacByAccountName([FromBody] AccountAndAppIdRequest request) 
+        public async Task<dynamic> banMacByAccountName([FromBody] AccountAndAppIdRequest request)
         {
             DateTime now = DateTime.UtcNow;
             var app_id_group = (from a in db.DimAppIds
@@ -828,7 +823,5 @@ namespace Horizon.Database.Controllers
             db.SaveChanges();
             return Ok("Mac Banned");
         }
-
-
     }
 }

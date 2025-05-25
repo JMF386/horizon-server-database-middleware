@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Horizon.Database.DTO;
+using Horizon.Database.Entities;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Horizon.Database.DTO;
-using Horizon.Database.Entities;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Horizon.Database.Controllers
 {
@@ -14,6 +12,7 @@ namespace Horizon.Database.Controllers
     public class BuddyController : ControllerBase
     {
         private Ratchet_DeadlockedContext db;
+
         public BuddyController(Ratchet_DeadlockedContext _db)
         {
             db = _db;
@@ -73,7 +72,7 @@ namespace Horizon.Database.Controllers
             if (existingIgnored != null)
                 return StatusCode(403, "This player is already ignored.");
 
-            if(existingFriend != null)
+            if (existingFriend != null)
             {
                 db.AccountFriend.Attach(existingFriend);
                 db.Entry(existingFriend).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Horizon.Database.Helpers
+﻿namespace Horizon.Database.Helpers
 {
     public class AppSettings
     {

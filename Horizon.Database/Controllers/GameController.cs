@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Horizon.Database.DTO;
-using Horizon.Database.Models;
+﻿using Horizon.Database.DTO;
 using Horizon.Database.Entities;
+using Horizon.Database.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Horizon.Database.Helpers;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Horizon.Database.Controllers
 {
@@ -17,6 +15,7 @@ namespace Horizon.Database.Controllers
     public class GameController : ControllerBase
     {
         private Ratchet_DeadlockedContext db;
+
         public GameController(Ratchet_DeadlockedContext _db)
         {
             db = _db;
@@ -76,8 +75,6 @@ namespace Horizon.Database.Controllers
             }
         }
 
-
-
         [Authorize("stats_bot,discord_bot")]
         [HttpGet, Route("historyByDate/{appId}")]
         public async Task<dynamic> getGameHistoryByDate(int appId, [FromQuery] DateTime lastGameEndDt)
@@ -116,13 +113,12 @@ namespace Horizon.Database.Controllers
             }
         }
 
-
-
         [Authorize("stats_bot,discord_bot")]
         [HttpGet, Route("history/getRecentGames")]
         public async Task<dynamic> getRecentGames(int appId, int minutes)
         {
-            if (minutes > 60) {
+            if (minutes > 60)
+            {
                 return null;
             }
 
@@ -140,10 +136,6 @@ namespace Horizon.Database.Controllers
 
             return games;
         }
-
-        
-
-
 
         //[Authorize("stats_bot")]
         [HttpPut, Route("history")]
@@ -276,7 +268,6 @@ namespace Horizon.Database.Controllers
                 }
                 else
                 {
-
                     existingGame.GameId = game.GameId;
                     existingGame.AppId = game.AppId;
                     existingGame.MinPlayers = game.MinPlayers;
@@ -321,7 +312,6 @@ namespace Horizon.Database.Controllers
 
             if (existingGame != null)
             {
-
                 existingGame.Metadata = MetaData;
 
                 db.SaveChanges();

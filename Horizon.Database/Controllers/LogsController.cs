@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Transactions;
-using Horizon.Database.DTO;
+﻿using Horizon.Database.DTO;
 using Horizon.Database.Entities;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Horizon.Database.Controllers
 {
@@ -19,6 +16,7 @@ namespace Horizon.Database.Controllers
     public class LogsController : ControllerBase
     {
         private Ratchet_DeadlockedContext db;
+
         public LogsController(Ratchet_DeadlockedContext _db)
         {
             db = _db;
@@ -56,7 +54,6 @@ namespace Horizon.Database.Controllers
             {
                 string rbody = stream.ReadToEndAsync().Result;
 
-
                 var payload = new
                 {
                     query = context.Request.QueryString.Value,
@@ -79,10 +76,7 @@ namespace Horizon.Database.Controllers
                 };
                 db.ServerLog.Add(log);
                 db.SaveChanges();
-
             }
-
-
 
             return Problem();
         }
@@ -102,9 +96,11 @@ namespace Horizon.Database.Controllers
                         entry.CurrentValues.SetValues(entry.OriginalValues);
                         entry.State = EntityState.Unchanged;
                         break;
+
                     case EntityState.Added:
                         entry.State = EntityState.Detached;
                         break;
+
                     case EntityState.Deleted:
                         entry.State = EntityState.Unchanged;
                         break;

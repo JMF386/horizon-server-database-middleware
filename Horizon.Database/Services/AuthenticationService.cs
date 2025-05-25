@@ -1,4 +1,8 @@
 ﻿using Horizon.Database.DTO;
+using Horizon.Database.Entities;
+using Horizon.Database.Helpers;
+using Horizon.Database.Models;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -6,25 +10,18 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
-using Horizon.Database.Models;
-using Horizon.Database.Entities;
-using Horizon.Database.Controllers;
-using Microsoft.EntityFrameworkCore;
-using Horizon.Database.Helpers;
-using Microsoft.Extensions.Options;
 
 namespace Horizon.Database.Services
 {
     public interface IAuthService
     {
         AuthenticationResponse Authenticate(AuthenticationRequest model);
+
         UserDTO GetById(int id);
     }
 
     public class AuthenticationService : IAuthService
     {
-
         private readonly AppSettings appSettings;
         private readonly Ratchet_DeadlockedContext db;
 
@@ -62,7 +59,7 @@ namespace Horizon.Database.Services
                 Roles = (from ur in db.UserRole
                          join r in db.Roles
                             on ur.RoleId equals r.RoleId
-                         where ur.AccountId == AccountId 
+                         where ur.AccountId == AccountId
                          && ur.FromDt <= now && (ur.ToDt == null || ur.ToDt >= now)
                          select r.RoleName).ToList()
             };

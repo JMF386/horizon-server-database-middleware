@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Horizon.Database.DTO;
+using Horizon.Database.Entities;
+using Horizon.Database.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Horizon.Database.DTO;
-using Horizon.Database.Entities;
-using Horizon.Database.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Horizon.Database.Controllers
 {
@@ -17,6 +16,7 @@ namespace Horizon.Database.Controllers
     {
         private Ratchet_DeadlockedContext db;
         private IAuthService authService;
+
         public StatsController(Ratchet_DeadlockedContext _db, IAuthService _authService)
         {
             db = _db;
@@ -110,7 +110,6 @@ namespace Horizon.Database.Controllers
             var app_ids_in_group = (from a in db.DimAppIds
                                     where (a.GroupId == app_id_group && a.GroupId != null) || a.AppId == AppId
                                     select a.AppId).ToList();
-
 
             List<AccountStat> stats = db.AccountStat.Where(s => s.Account.IsActive == true && s.StatId == StatId && app_ids_in_group.Contains(s.Account.AppId ?? -1)).OrderByDescending(s => s.StatValue).ThenBy(s => s.AccountId).ToList();
             AccountStat statForAccount = stats.Where(s => s.AccountId == AccountId).FirstOrDefault();
@@ -299,19 +298,19 @@ namespace Horizon.Database.Controllers
             List<ClanStat> stats = db.ClanStat.Where(s => s.Clan.IsActive == true && s.StatId == StatId && s.Clan.AppId == AppId).OrderByDescending(s => s.StatValue).ThenBy(s => s.ClanId).Skip(StartIndex).Take(Size).ToList();
 
             List<ClanLeaderboardDTO> board = (from s in stats
-                                          join c in db.Clan
-                                            on s.ClanId equals c.ClanId
-                                            where c.IsActive == true
-                                          select new ClanLeaderboardDTO()
-                                          {
-                                              TotalRankedClans = 0,
-                                              StartIndex = StartIndex,
-                                              Index = StartIndex + stats.IndexOf(s),
-                                              ClanId = s.ClanId,
-                                              ClanName = c.ClanName,
-                                              StatValue = s.StatValue,
-                                              MediusStats = c.MediusStats
-                                          }).ToList();
+                                              join c in db.Clan
+                                                on s.ClanId equals c.ClanId
+                                              where c.IsActive == true
+                                              select new ClanLeaderboardDTO()
+                                              {
+                                                  TotalRankedClans = 0,
+                                                  StartIndex = StartIndex,
+                                                  Index = StartIndex + stats.IndexOf(s),
+                                                  ClanId = s.ClanId,
+                                                  ClanName = c.ClanName,
+                                                  StatValue = s.StatValue,
+                                                  MediusStats = c.MediusStats
+                                              }).ToList();
 
             return board;
         }
@@ -349,7 +348,6 @@ namespace Horizon.Database.Controllers
 
             foreach (AccountStat pStat in playerStats)
             {
-                
                 int newValue = statData.stats[pStat.StatId - 1];
                 pStat.ModifiedDt = modifiedDt;
                 pStat.StatValue = newValue;
@@ -360,14 +358,14 @@ namespace Horizon.Database.Controllers
 
             db.SaveChanges();
             return Ok();
-
         }
 
         [Authorize("discord_bot")]
         [HttpGet, Route("getRecentStatChanges")]
         public async Task<List<AccountStatDTO>> getRecentStats([FromQuery] int minutes = 5)
         {
-            if (minutes > 60) {
+            if (minutes > 60)
+            {
                 return new List<AccountStatDTO>();
             }
 
@@ -403,7 +401,7 @@ namespace Horizon.Database.Controllers
                 {
                     AccountCustomStat newStat = new AccountCustomStat()
                     {
-                        StatId = i+1,
+                        StatId = i + 1,
                         AccountId = statData.AccountId,
                         StatValue = statData.stats[i],
                     };
@@ -419,7 +417,6 @@ namespace Horizon.Database.Controllers
 
             db.SaveChanges();
             return Ok();
-
         }
 
         [Authorize("moderator")]
@@ -427,7 +424,7 @@ namespace Horizon.Database.Controllers
         public async Task<dynamic> combineAccountStat([FromBody] CombineAccountStatDTO statData)
         {
             DateTime modifiedDt = DateTime.UtcNow;
-            
+
             var app_id_group = (from a in db.DimAppIds
                                 where a.AppId == statData.AppId
                                 select a.GroupId).FirstOrDefault();
@@ -437,13 +434,13 @@ namespace Horizon.Database.Controllers
                                     select a.AppId).ToList();
 
             Account accountFrom = db.Account.Where(a => app_ids_in_group.Contains(a.AppId ?? -1) && a.AccountName == statData.AccountNameFrom && a.IsActive == true).FirstOrDefault();
-            if(accountFrom == null || accountFrom.IsActive == false)
+            if (accountFrom == null || accountFrom.IsActive == false)
             {
                 return StatusCode(403, $"AccountFrom {statData.AccountNameFrom} not found.");
             }
 
             Account accountTo = db.Account.Where(a => app_ids_in_group.Contains(a.AppId ?? -1) && a.AccountName == statData.AccountNameTo && a.IsActive == true).FirstOrDefault();
-            if(accountTo == null || accountTo.IsActive == false)
+            if (accountTo == null || accountTo.IsActive == false)
             {
                 return StatusCode(403, $"AccountTo {statData.AccountNameTo} not found.");
             }
@@ -453,8 +450,8 @@ namespace Horizon.Database.Controllers
 
             // Get the valid list of stats to combine
             var settings = await (from s in db.ServerSettings
-                            where s.AppId == statData.AppId
-                            select new { s.Name, s.Value }).ToDictionaryAsync(x => x.Name, x => x.Value);
+                                  where s.AppId == statData.AppId
+                                  select new { s.Name, s.Value }).ToDictionaryAsync(x => x.Name, x => x.Value);
 
             if (!settings.ContainsKey("AccountCombineStatIds"))
             {
@@ -493,19 +490,18 @@ namespace Horizon.Database.Controllers
 
             db.SaveChanges();
             return Ok();
-
         }
 
         [Authorize("database,moderator")]
         [HttpPost, Route("resetLeaderboardCustom")]
         public async Task<dynamic> resetLeaderboardCustom([FromBody] ResetStatDTO statData)
         {
-            List<AccountCustomStat> playerStats =   (from s in db.AccountCustomStat
-                                                     join c in db.Account
-                                                       on s.AccountId equals c.AccountId
-                                                     where c.AppId == statData.AppId && s.StatId == statData.StatId && s.StatValue > 0
-                                                     select s).ToList();
-            
+            List<AccountCustomStat> playerStats = (from s in db.AccountCustomStat
+                                                   join c in db.Account
+                                                     on s.AccountId equals c.AccountId
+                                                   where c.AppId == statData.AppId && s.StatId == statData.StatId && s.StatValue > 0
+                                                   select s).ToList();
+
             foreach (var playerStat in playerStats)
             {
                 playerStat.StatValue = 0;
@@ -514,7 +510,6 @@ namespace Horizon.Database.Controllers
 
             db.SaveChanges();
             return Ok();
-
         }
 
         [Authorize("database")]
@@ -530,7 +525,6 @@ namespace Horizon.Database.Controllers
 
             foreach (ClanStat cStat in clanStats)
             {
-
                 int newValue = statData.stats[cStat.StatId - 1];
                 cStat.ModifiedDt = modifiedDt;
                 cStat.StatValue = newValue;
@@ -541,7 +535,6 @@ namespace Horizon.Database.Controllers
 
             db.SaveChanges();
             return Ok();
-
         }
 
         [Authorize("database")]
@@ -558,12 +551,12 @@ namespace Horizon.Database.Controllers
             // populate custom stats if not already exists
             for (int i = 0; i < statData.stats.Count; ++i)
             {
-                ClanCustomStat existingStat = clanStats.Where(x => x.StatId == (i+1)).FirstOrDefault();
+                ClanCustomStat existingStat = clanStats.Where(x => x.StatId == (i + 1)).FirstOrDefault();
                 if (existingStat == null)
                 {
                     ClanCustomStat newStat = new ClanCustomStat()
                     {
-                        StatId = i+1,
+                        StatId = i + 1,
                         ClanId = statData.ClanId,
                         StatValue = statData.stats[i],
                     };
@@ -579,8 +572,6 @@ namespace Horizon.Database.Controllers
 
             db.SaveChanges();
             return Ok();
-
         }
-
     }
 }
