@@ -5,6 +5,10 @@
     <UserSecretsId>57798175-b54d-4371-a5be-26bdb76079d1</UserSecretsId>
   </PropertyGroup>
 
+	<PropertyGroup>
+		<ServerGarbageCollection>false</ServerGarbageCollection>
+	</PropertyGroup>
+
   <ItemGroup>
     <Content Remove="db.json" />
   </ItemGroup>
