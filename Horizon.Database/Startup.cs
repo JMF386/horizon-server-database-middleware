@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Horizon.Database
 {
@@ -92,12 +93,14 @@ namespace Horizon.Database
                 //c.IncludeXmlComments(xmlPath);
             });
 
+            /*
             services.AddControllers().AddNewtonsoftJson(options =>
             {
                 options.UseMemberCasing();
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             }
             );
+            */
 
             services.AddMvc(setupAction =>
             {
@@ -105,6 +108,7 @@ namespace Horizon.Database
             }).AddJsonOptions(jsonOptions =>
             {
                 jsonOptions.JsonSerializerOptions.PropertyNamingPolicy = null;
+                jsonOptions.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             });
             // If using Kestrel:
             services.Configure<KestrelServerOptions>(options =>

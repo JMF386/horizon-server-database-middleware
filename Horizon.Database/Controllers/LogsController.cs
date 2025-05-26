@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Horizon.Database.Controllers
@@ -61,7 +62,7 @@ namespace Horizon.Database.Controllers
                     innerException = exceptionContext.Error.InnerException
                 };
                 context.Request.Body.Position = 0;
-                string payloadString = JsonConvert.SerializeObject(payload, Formatting.Indented);
+                string payloadString = JsonSerializer.Serialize(payload, new JsonSerializerOptions() { WriteIndented = true});
 
                 RollBack();
                 ServerLog log = new ServerLog()

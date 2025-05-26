@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 
 namespace Horizon.Database
@@ -138,7 +139,7 @@ namespace Horizon.Database
             // Read the JSON file content
             string jsonContent = File.ReadAllText(filePath);
 
-            AppGroupSettings appGroupSettings = JsonConvert.DeserializeObject<AppGroupSettings>(jsonContent);
+            AppGroupSettings appGroupSettings = JsonSerializer.Deserialize<AppGroupSettings>(jsonContent);
 
             // Process AppGroups
             foreach (var appGroup in appGroupSettings.AppGroups)
