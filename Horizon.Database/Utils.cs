@@ -18,30 +18,30 @@ namespace Horizon.Database
                 byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
 
                 // Convert byte array to a string
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < bytes.Length; i++)
-                    builder.Append(bytes[i].ToString("x2"));
-
-                return builder.ToString();
+                StringBuilder sb = new StringBuilder();
+                foreach (byte b in bytes)
+                {
+                    sb.Append(b.ToString("x2"));
+                }
+                return sb.ToString();
             }
         }
 
         public static string ComputeSHA512(string input)
         {
-            // Convert input string to a byte array
-            byte[] inputBytes = Encoding.UTF8.GetBytes(input);
-
             // Compute hash value
-            SHA512 sha512 = SHA512.Create();
-            byte[] hashBytes = sha512.ComputeHash(inputBytes);
-
-            // Convert hash bytes to a string
-            StringBuilder sb = new StringBuilder();
-            foreach (byte b in hashBytes)
+            using (SHA512 sha512Hash = SHA512.Create())
             {
-                sb.Append(b.ToString("x2"));
+                byte[] bytes = sha512Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
+
+                // Convert hash bytes to a string
+                StringBuilder sb = new StringBuilder();
+                foreach (byte b in bytes)
+                {
+                    sb.Append(b.ToString("x2"));
+                }
+                return sb.ToString();
             }
-            return sb.ToString();
         }
 
         #endregion SHA-256
