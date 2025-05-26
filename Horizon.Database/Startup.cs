@@ -43,7 +43,7 @@ namespace Horizon.Database
                 string dbPassword = Environment.GetEnvironmentVariable("HORIZON_MSSQL_SA_PASSWORD");
 
                 var connectionString = connectionStringPlaceHolder.Replace("{_SERVER}", serverName).Replace("{_DBNAME}", dbName).Replace("{_USERNAME}", dbUserName).Replace("{_PASSWORD}", dbPassword);
-                dbContextBuilder.UseSqlServer(connectionString);
+                dbContextBuilder.UseNpgsql(connectionString);
             });
 
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
