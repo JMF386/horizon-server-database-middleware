@@ -47,8 +47,8 @@ namespace Horizon.Database
             // Configure DbContextOptionsBuilder
             var optionsBuilder = new DbContextOptionsBuilder();
 
-            // Use SQL Server provider with connection string
-            optionsBuilder.UseSqlServer(connectionString);
+            // Use PostGreSQL provider with connection string
+            optionsBuilder.UseNpgsql(connectionString);
 
             // Create DbContextOptions from optionsBuilder
             var options = optionsBuilder.Options;

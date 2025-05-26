@@ -9,8 +9,8 @@ namespace Horizon.Database
         public static void Main(string[] args)
         {
             Console.WriteLine("Initializing!");
-            DatabaseChecker dc = new DatabaseChecker();
-            dc.WaitForDatabase();
+            //DatabaseChecker dc = new DatabaseChecker();
+            //dc.WaitForDatabase();
 
             // Build the host to get the required services
             CreateHostBuilder(args).Build().Run();
